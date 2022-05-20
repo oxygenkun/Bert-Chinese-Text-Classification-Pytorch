@@ -13,7 +13,8 @@ args = parser.parse_args()
 
 
 if __name__ == '__main__':
-    dataset = 'THUCNews'  # 数据集
+    # dataset = 'THUCNews'  # 数据集
+    dataset = 'WORDS'
 
     model_name = args.model  # bert
     x = import_module('models.' + model_name)

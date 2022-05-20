@@ -20,7 +20,8 @@ import sys
 import json
 import logging
 import os
-import regex as re
+# import regex as re
+import re
 from io import open
 
 try:
