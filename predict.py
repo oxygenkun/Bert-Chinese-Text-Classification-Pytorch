@@ -15,14 +15,20 @@ args = parser.parse_args()
 
 
 def predict(config, model, data_iter, test=False):
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(config.save_path))
+    else:
+        model.load_state_dict(torch.load(config.save_path, map_location = torch.device('cpu')))
     model.eval()
     loss_total = 0
     predict_all = None
     # labels_all = np.array([], dtype=int)
     with torch.no_grad():
-        for texts, _ in data_iter:
+        for texts, labels in data_iter:
             outputs = model(texts)
             result = torch.max(outputs.data, 1)[1].cpu()
+            # print(labels)
+            # print(result)
             if predict_all is not None:
                 predict_all = torch.cat(tensors=(predict_all, result))
             else:
@@ -55,4 +61,6 @@ if __name__ == '__main__':
     # test
     model = x.Model(config).to(config.device)
     ret = predict(config, model, pred_iter)
-    pd.DataFrame(ret, columns=["nums"]).to_parquet("ret.parquet")
+    output = pd.DataFrame(ret, columns=["nums"])
+    output.to_parquet("ret.parquet")
+    # output.to_csv("ret.csv")
