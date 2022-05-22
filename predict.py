@@ -28,6 +28,8 @@ def predict(config, model, data_iter, test=False):
             else:
                 predict_all = result
 
+            print(f"predicted {predict_all.shape[0]} records")
+
     return predict_all.numpy()
 
 
