@@ -84,7 +84,10 @@ def train(config, model, train_iter, dev_iter, test_iter):
 
 def test(config, model, test_iter):
     # test
-    model.load_state_dict(torch.load(config.save_path))
+    if torch.cuda.is_available():
+        model.load_state_dict(torch.load(config.save_path))
+    else:
+        model.load_state_dict(torch.load(config.save_path, map_location = torch.device('cpu')))
     model.eval()
     start_time = time.time()
     test_acc, test_loss, test_report, test_confusion = evaluate(config, model, test_iter, test=True)

@@ -80,6 +80,11 @@ python run.py --model bert_CNN
 
 # ERNIE
 python run.py --model ERNIE
+
+
+# 预测
+## bert
+python predict.py --model bert
 ```
 
 ### 参数

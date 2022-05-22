@@ -8,7 +8,6 @@ PAD, CLS = '[PAD]', '[CLS]'  # padding符号, bert中综合信息符号
 
 
 def build_dataset(config):
-
     def load_dataset(path, pad_size=32):
         contents = []
         with open(path, 'r', encoding='UTF-8') as f:
@@ -36,7 +35,8 @@ def build_dataset(config):
     train = load_dataset(config.train_path, config.pad_size)
     dev = load_dataset(config.dev_path, config.pad_size)
     test = load_dataset(config.test_path, config.pad_size)
-    return train, dev, test
+    pred = load_dataset(config.pred_path, config.pad_size)
+    return train, dev, test, pred
 
 
 class DatasetIterater(object):
@@ -85,9 +85,10 @@ class DatasetIterater(object):
             return self.n_batches
 
 
-def build_iterator(dataset, config):
-    iter = DatasetIterater(dataset, config.batch_size, config.device)
-    return iter
+def build_iterator(dataset, config, is_predict=False):
+    if not is_predict:
+        iter = DatasetIterater(dataset, config.batch_size, config.device)
+        return iter
 
 
 def get_time_dif(start_time):

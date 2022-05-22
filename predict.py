@@ -1,15 +1,34 @@
 # coding: UTF-8
-import time
-import torch
-import numpy as np
-from train_eval import train, init_network
 from importlib import import_module
 import argparse
 from utils import build_dataset, build_iterator, get_time_dif
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import time
 
 parser = argparse.ArgumentParser(description='Chinese Text Classification')
 parser.add_argument('--model', type=str, required=True, help='choose a model: Bert, ERNIE')
 args = parser.parse_args()
+
+
+def predict(config, model, data_iter, test=False):
+    model.eval()
+    loss_total = 0
+    predict_all = None
+    # labels_all = np.array([], dtype=int)
+    with torch.no_grad():
+        for texts, _ in data_iter:
+            outputs = model(texts)
+            result = torch.max(outputs.data, 1)[1].cpu()
+            if predict_all is not None:
+                predict_all = torch.cat(tensors=(predict_all, result))
+            else:
+                predict_all = result
+
+    return predict_all.numpy()
 
 
 if __name__ == '__main__':
@@ -26,13 +45,12 @@ if __name__ == '__main__':
 
     start_time = time.time()
     print("Loading data...")
-    train_data, dev_data, test_data, _ = build_dataset(config)
-    train_iter = build_iterator(train_data, config)
-    dev_iter = build_iterator(dev_data, config)
-    test_iter = build_iterator(test_data, config)
+    _, _, _, pred_data = build_dataset(config)
+    pred_iter = build_iterator(pred_data, config)
     time_dif = get_time_dif(start_time)
     print("Time usage:", time_dif)
 
-    # train
+    # test
     model = x.Model(config).to(config.device)
-    train(config, model, train_iter, dev_iter, test_iter)
+    ret = predict(config, model, pred_iter)
+    pd.DataFrame(ret, columns=["nums"]).to_parquet("ret.parquet")
